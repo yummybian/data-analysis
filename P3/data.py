@@ -67,10 +67,8 @@ def shape_element(element):
             elif tag.attrib["k"] in ("name", "name:en", "name:zh"):
                 # 统一为中文名
                 if is_kfc(tag.attrib["v"]):
-                    cnt["kfc"] = cnt["kfc"] + 1
                     node["name"] = "肯德基"
                 elif is_mc(tag.attrib["v"]):
-                    cnt["mc"] = cnt["mc"] + 1
                     node["name"] = "麦当劳"
                 else:
                     node["name"] = tag.attrib["v"]
