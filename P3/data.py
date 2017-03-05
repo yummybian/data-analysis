@@ -17,28 +17,28 @@ MC = [u"mcdonald", u"麦当劳"]
 
 
 def is_kfc(name):
+    name_lower = name.lower()
     for x in KFC:
-        if x in name.lower():
+        if x in name_lower:
             return True
 
     return False
 
 
 def is_mc(name):
+    name_lower = name.lower()
     for x in MC:
-        if x in name.lower():
+        if x in name_lower:
             return True
 
     return False
 
 
 def correct_city(name):
-    if u"wuhan" in name or u"武汉" in name:
-        return u"武汉"
-    elif u"汉川" in name:
+    if u"汉川" in name:
         return u"汉川"
     else:
-        return name
+        return u"武汉"
 
 
 def shape_element(element):
@@ -79,7 +79,7 @@ def shape_element(element):
 
         if addr_dict:
             # 整理城市名称
-            if "city" in addr_dict: 
+            if "city" in addr_dict:
                 addr_dict["city"] = correct_city(addr_dict["city"])
             node["address"] = addr_dict
 
