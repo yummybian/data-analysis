@@ -1,0 +1,271 @@
+---
+title: "Wine Quality"
+author: "Jacky"
+date: "4/27/2017"
+output: html_document
+---
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using
+# in your analysis in this code chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+
+suppressMessages(library(ggplot2))
+suppressMessages(library(gridExtra))
+library(psych)
+library(dplyr)
+library(scales)
+library(memisc)
+library(RColorBrewer)
+library(varhandle)
+
+color_fill <- '#099DD9'
+```
+
+```{r echo=FALSE, Load_the_Data}
+# 加载csv样本集
+wine <- read.csv("wineQualityReds.csv")
+
+# 删除无用的X变量
+# wine <- within(wine, rm(X))
+wine$X <- NULL
+```
+
+
+# Univariate Plots Section
+```{r echo=FALSE, Univariate_Plots}
+# 查看变量
+names(wine)
+str(wine)
+
+# 查看基本统计信息
+summary(wine)
+
+# 转换quality为factor
+wine$quality <- factor(wine$quality, ordered = T)
+```
+可以看到有1599条样本，每条样本有13个变量
+
+绘制所有变量的直方图
+```{r echo=FALSE}
+get_histogram <- function(var, xlabel) {
+  return (qplot(x = var, data = wine, xlab = xlabel, fill = I(color_fill)))
+}
+
+grid.arrange(get_histogram(wine$fixed.acidity, 'fixed.acidity'),
+get_histogram(wine$volatile.acidity, 'volatile.acidity'),
+get_histogram(wine$citric.acid, 'citric.acid'),
+get_histogram(wine$residual.sugar, 'residual.sugar'),
+get_histogram(wine$chlorides, 'chlorides'),
+get_histogram(wine$free.sulfur.dioxide, 'free.sulfur.dioxide'),
+get_histogram(wine$total.sulfur.dioxide, 'total.sulfur.dioxide'),
+get_histogram(wine$density, 'density'),
+get_histogram(wine$pH, 'pH'),
+get_histogram(wine$sulphates, 'sulphates'),
+get_histogram(wine$alcohol, 'alcohol'),
+get_histogram(wine$quality, 'quality'),
+ncol = 3)
+```
+
+绘制quality的直方图
+```{r}
+qplot(quality, data = wine, fill=I(color_fill))
+table(wine$quality)
+```
+可以看到，大部分(82%)的quality评分在5，6分
+
+
+绘制fixed.acidity的直方图
+```{r}
+qplot(fixed.acidity, data = wine, fill=I(color_fill))
+sort(table(wine$fixed.acidity), decreasing = T)
+```
+可以看到，fixed.acidity的峰值出现在7.2，在16附近出现了一些异常值
+
+
+绘制volatile.acidity的直方图
+```{r}
+qplot(volatile.acidity, data = wine, fill=I(color_fill))
+sort(table(wine$volatile.acidity), decreasing = T)
+```
+volatile.acidity的峰值出现在0.6， 在1.6左右出现了异常值
+
+移除1%的异常值，再次绘制直方图
+```{r}
+qplot(volatile.acidity, data = wine, fill=I(color_fill), binwidth=0.02) +
+  coord_cartesian(xlim = c(0, quantile(wine$volatile.acidity, .99)))
+```
+
+出现了近似对称的双峰直方图
+
+绘制citric.acid的直方图
+```{r}
+qplot(citric.acid, data = wine, fill=I(color_fill))
+table(wine$citric.acid)
+```
+发现132个0值，和一个为1的异常值，这是一个多峰分布
+
+绘制residual.sugar的直方图
+```{r}
+qplot(residual.sugar, data = wine, fill=I(color_fill))
+sort(table(wine$residual.sugar), decreasing = T)
+```
+峰值出现在2，有很长的长尾
+
+对residual.sugar做对数变换，然后再次绘制直方图
+```{r}
+qplot(residual.sugar, data = wine, fill=I(color_fill)) +
+  scale_x_log10()
+```
+
+
+绘制chlorides的直方图
+```{r}
+qplot(chlorides, data = wine, fill=I(color_fill))
+sort(table(wine$chlorides), decreasing = T)
+```
+峰值处在在0.08，有很长的长尾
+
+对chlorides做对数变换，然后再次绘制直方图
+```{r}
+qplot(chlorides, data = wine, fill=I(color_fill)) +
+  scale_x_log10()
+```
+
+绘制free.sulfur.dioxide的直方图
+```{r}
+qplot(free.sulfur.dioxide, data = wine, fill=I(color_fill))
+head(sort(table(wine$free.sulfur.dioxide), decreasing = T))
+```
+free.sulfur.dioxide峰值出现在6，有长尾并出现了一些异常值
+
+绘制total.sulfur.dioxide的直方图
+```{r}
+qplot(total.sulfur.dioxide, data = wine, fill=I(color_fill))
+head(sort(table(wine$total.sulfur.dioxide), decreasing = T))
+```
+free.sulfur.dioxide峰值出现在28，有长尾并出现了一些异常值。他和free.sulfur.dioxide分布类似，我觉得这两个变量具有相关性。
+
+绘制density的直方图
+```{r}
+qplot(density, data = wine, fill=I(color_fill))
+summary(wine$density)
+```
+正态分布，中位数0.9968，均值0.9967
+
+绘制pH的直方图
+```{r}
+qplot(pH, data = wine, fill=I(color_fill))
+summary(wine$pH)
+```
+正态分布，中位数3.310，均值3.311
+
+
+绘制sulphates的直方图
+```{r}
+qplot(sulphates, data = wine, fill=I(color_fill))
+
+qplot(sulphates, data = wine, fill=I(color_fill)) +
+  scale_x_log10(breaks = c(0.5, 1.0,1.5,2.0))
+```
+有长尾，并且有异常值，用对数转换为近似正态分布，峰值出现在0.6附近
+
+
+绘制alcohol的长尾
+```{r}
+qplot(alcohol, data = wine, fill=I(color_fill))
+head(sort(table(wine$alcohol), decreasing = T))
+```
+峰值出现在9.5，这个直方图的形状类似total.sulfur.dioxide和free.sulfur.dioxide
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+这个样本集有1599条样本，每条样本有13个变量。有一个quality的因子变量，范围从1到10
+1. 变量citric.acid含有大量的0值
+2. 变量density和pH服从正态分布
+3. 变量residual.sugar，chlorides和sulphates有很长的长尾
+4. 大部分(82%)的quality评分在5，6分
+
+### What is/are the main feature(s) of interest in your dataset?
+主要关心quality变量，想知道有哪些因素影响这个变量
+
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+### Did you create any new variables from existing variables in the dataset?
+
+### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+
+
+
+# Bivariate Plots Section
+```{r echo=FALSE, Bivariate_Plots}
+# wine[is.na(wine)] <- 0
+wine$quality <- unfactor(wine$quality)
+cor(wine[,c(1:12)], use="pairwise.complete.obs")
+
+
+pairs.panels(wine[,2:11], pch=".")
+```
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+### What was the strongest relationship you found?
+
+
+
+
+# Multivariate Plots Section
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+
+
