@@ -16,12 +16,13 @@ output: html_document
 
 suppressMessages(library(ggplot2))
 suppressMessages(library(gridExtra))
-library(psych)
-library(dplyr)
-library(scales)
-library(memisc)
-library(RColorBrewer)
-library(varhandle)
+suppressMessages(library(psych))
+suppressMessages(library(dplyr))
+suppressMessages(library(scales))
+suppressMessages(library(memisc))
+suppressMessages(library(RColorBrewer))
+suppressMessages(library(varhandle))
+suppressMessages(library(corrplot))
 
 color_fill <- '#099DD9'
 ```
@@ -204,13 +205,39 @@ head(sort(table(wine$alcohol), decreasing = T))
 
 # Bivariate Plots Section
 ```{r echo=FALSE, Bivariate_Plots}
-# wine[is.na(wine)] <- 0
-wine$quality <- unfactor(wine$quality)
-cor(wine[,c(1:12)], use="pairwise.complete.obs")
-
-
-pairs.panels(wine[,2:11], pch=".")
+# 把quality因子转换为数字类型
+wine$numquality <- as.numeric(wine$quality)
+# 相关性矩阵保存为一个data frame
+m = cor(wine[c(1:11, 13)])
+# 显示相关性矩阵
+corrplot(m, order = "hclust", insig = "pch", addrect = 3)
 ```
+可以看出quality和alcohol，volatile acidity，sulphates和citric acid相关性比较大
+
+```{r}
+# quality/alcohol boxplot
+qplot(x = quality, y = alcohol, data = wine, geom = 'boxplot')
+# 根据quality显示alcohol的summary
+by(wine$alcohol, wine$quality, summary)
+```
+可以看出高quality的红酒相应的alcohol也高。除了quality为5的红酒，其他红酒的alcohol的中位数呈现升高的趋势，而且quality为5的红酒的异常值有很多。我觉得可能是样本的错误。
+
+
+```{r}
+# quality/volatile.acidity boxplot
+qplot(x = quality, y = volatile.acidity, data = wine, geom = 'boxplot')
+# 根据quality显示volatile.acidity的summary
+by(wine$volatile.acidity, wine$quality, summary)
+```
+可以看出，volatile.acidity和quality呈现负相关。随着quality的提高，volatile.acidity的中位数相应的降低，但quality为7，8的变化不明显。总的来说，好的红酒volatile.acidity比较低。
+
+```{r}
+# quality/sulphates boxplot
+qplot(x = quality, y = sulphates, data = wine, geom = 'boxplot')
+# 根据quality显示sulphates的summary
+by(wine$sulphates, wine$quality, summary)
+```
+可以看出随着quality的提高，sulphates也相应提高。但quality为5，6的样本中出现很多的异常值，也许是由于样本的错误，所以我们不能说sulphates和quality有相关性，只能说sulphates可能对红酒口味有影响
 
 # Bivariate Analysis
 
