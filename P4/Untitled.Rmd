@@ -211,6 +211,7 @@ wine$numquality <- as.numeric(wine$quality)
 m = cor(wine[c(1:11, 13)])
 # 显示相关性矩阵
 corrplot(m, order = "hclust", insig = "pch", addrect = 3)
+pairs.panels(m, pch=".")
 ```
 可以看出quality和alcohol，volatile acidity，sulphates和citric acid相关性比较大
 
@@ -237,7 +238,74 @@ qplot(x = quality, y = sulphates, data = wine, geom = 'boxplot')
 # 根据quality显示sulphates的summary
 by(wine$sulphates, wine$quality, summary)
 ```
-可以看出随着quality的提高，sulphates也相应提高。但quality为5，6的样本中出现很多的异常值，也许是由于样本的错误，所以我们不能说sulphates和quality有相关性，只能说sulphates可能对红酒口味有影响
+可以看出随着quality的提高，sulphates也相应提高。但quality为5，6的样本中出现很多的异常值，也许是由于样本的错误，所以我们不能说sulphates和quality有相关性，只能说sulphates可能对红酒口味有影响。
+
+```{r}
+# quality/citric.acid boxplot
+qplot(x = quality, y = citric.acid, data = wine, geom = 'boxplot')
+# 根据quality显示citric.acid的summary
+by(wine$citric.acid, wine$quality, summary)
+```
+可以看出随着红酒quality的提高，citric.acid也相应提高，他们是正相关的。一个有趣的现象，quality为3，4的，quality为5，6，quality为7，8的中位数很接近。
+
+```{r}
+# 其他变量的箱线图
+qplot(x = quality, y = fixed.acidity, data = wine, geom = 'boxplot') +
+  ylim(quantile(wine$fixed.acidity, 0.05), quantile(wine$fixed.acidity, 0.95))
+qplot(x = quality, y = residual.sugar, data = wine, geom = 'boxplot') +
+  ylim(0, quantile(wine$residual.sugar, 0.95))
+qplot(x = quality, y = chlorides, data = wine, geom = 'boxplot') +
+  ylim(quantile(wine$chlorides, 0.05), quantile(wine$chlorides, 0.95))
+qplot(x = quality, y = free.sulfur.dioxide, data = wine, geom = 'boxplot') +
+  ylim(0, quantile(wine$free.sulfur.dioxide, 0.95))
+qplot(x = quality, y = total.sulfur.dioxide, data = wine, geom = 'boxplot') +
+  ylim(0, quantile(wine$total.sulfur.dioxide, 0.95))
+qplot(x = quality, y = density, data = wine, geom = 'boxplot')
+  ylim(quantile(wine$density, 0.05), quantile(wine$density, 0.95))
+qplot(x = quality, y = pH, data = wine, geom = 'boxplot')
+  ylim(quantile(wine$pH, 0.05), quantile(wine$pH, 0.95))
+```
+可以看到，density，pH，fixed.acidity和quality直接也有相关性，quality高的红酒相应的fixed.acidity也高，quality高的红酒相应的density和pH低
+
+从相关性矩阵，可以看出其他非quality变量直接也有相关性
+1. Fixed acidity vs citric acid (0.67)
+2. Volatile acidity vs citric acid (-0.55)
+3. Fixed acidity vs density (0.67)
+4. Fixed acidity vs pH (-0.68)
+5. Citric acid vs pH (0.67)
+6. Free sulfur dioxide vs total sulfur dioxide (0.67)
+
+```{r}
+# Plot the bivariate scatterplot for citric acid and fixed acidity
+ggplot(data = wine, aes(x = citric.acid, y = fixed.acidity)) +
+  geom_jitter(alpha=1/3, color = 'blue') +
+  geom_smooth(method='lm', color='red')
+
+# Plot the bivariate scatterplot for citric acid and volatile acidity
+ggplot(data = wine, aes(x = citric.acid, y = volatile.acidity)) +
+  geom_jitter(alpha=1/3, color = 'blue') +
+  geom_smooth(method='lm', color='red')
+
+# Plot the bivariate scatterplot for fixed acidity and density
+ggplot(data = wine, aes(x = fixed.acidity, y = density)) +
+  geom_jitter(alpha=1/3, color = 'blue') +
+  geom_smooth(method='lm', color='red')
+
+# Plot the bivariate scatterplot for fixed acidity and pH
+ggplot(data = wine, aes(x = fixed.acidity, y = pH)) +
+  geom_jitter(alpha=1/3, color = 'blue') +
+  geom_smooth(method='lm', color='red')
+
+# Plot the bivariate scatterplot for citric acid and pH
+ggplot(data = wine, aes(x = citric.acid, y = pH)) +
+  geom_jitter(alpha=1/3, color = 'blue') +
+  geom_smooth(method='lm', color='red')
+
+# Plot the bivariate scatterplot for total and free sulfur dioxide
+ggplot(data = wine, aes(x = total.sulfur.dioxide, y = free.sulfur.dioxide)) +
+  geom_jitter(alpha=1/3, color = 'blue') +
+  geom_smooth(method='lm', color='red')
+```
 
 # Bivariate Analysis
 
