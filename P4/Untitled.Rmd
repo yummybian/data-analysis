@@ -28,7 +28,7 @@ color_fill <- '#099DD9'
 ```
 
 ```{r echo=FALSE, Load_the_Data}
-# 加载csv样本集
+# load csv
 wine <- read.csv("wineQualityReds.csv")
 
 # 删除无用的X变量
@@ -249,7 +249,7 @@ by(wine$citric.acid, wine$quality, summary)
 可以看出随着红酒quality的提高，citric.acid也相应提高，他们是正相关的。一个有趣的现象，quality为3，4的，quality为5，6，quality为7，8的中位数很接近。
 
 ```{r}
-# 其他变量的箱线图
+# boxplot for the others
 qplot(x = quality, y = fixed.acidity, data = wine, geom = 'boxplot') +
   ylim(quantile(wine$fixed.acidity, 0.05), quantile(wine$fixed.acidity, 0.95))
 qplot(x = quality, y = residual.sugar, data = wine, geom = 'boxplot') +
@@ -276,59 +276,137 @@ qplot(x = quality, y = pH, data = wine, geom = 'boxplot')
 6. Free sulfur dioxide vs total sulfur dioxide (0.67)
 
 ```{r}
-# Plot the bivariate scatterplot for citric acid and fixed acidity
+# scatterplot for citric acid and fixed acidity
 ggplot(data = wine, aes(x = citric.acid, y = fixed.acidity)) +
   geom_jitter(alpha=1/3, color = 'blue') +
   geom_smooth(method='lm', color='red')
 
-# Plot the bivariate scatterplot for citric acid and volatile acidity
+# scatterplot for citric acid and volatile acidity
 ggplot(data = wine, aes(x = citric.acid, y = volatile.acidity)) +
   geom_jitter(alpha=1/3, color = 'blue') +
   geom_smooth(method='lm', color='red')
 
-# Plot the bivariate scatterplot for fixed acidity and density
+# scatterplot for fixed acidity and density
 ggplot(data = wine, aes(x = fixed.acidity, y = density)) +
   geom_jitter(alpha=1/3, color = 'blue') +
   geom_smooth(method='lm', color='red')
 
-# Plot the bivariate scatterplot for fixed acidity and pH
+# scatterplot for fixed acidity and pH
 ggplot(data = wine, aes(x = fixed.acidity, y = pH)) +
   geom_jitter(alpha=1/3, color = 'blue') +
   geom_smooth(method='lm', color='red')
 
-# Plot the bivariate scatterplot for citric acid and pH
+# scatterplot for citric acid and pH
 ggplot(data = wine, aes(x = citric.acid, y = pH)) +
   geom_jitter(alpha=1/3, color = 'blue') +
   geom_smooth(method='lm', color='red')
 
-# Plot the bivariate scatterplot for total and free sulfur dioxide
+# scatterplot for total and free sulfur dioxide
 ggplot(data = wine, aes(x = total.sulfur.dioxide, y = free.sulfur.dioxide)) +
   geom_jitter(alpha=1/3, color = 'blue') +
   geom_smooth(method='lm', color='red')
 ```
+散点图显示了fixed acidity和citric acid有强烈的正相关，一个增加另外一个增加；Volatile acidity和citric acid有负相关，一个增加另外一个减少；density和fixed.acidity有着强烈的正相关，一个增加另外一个增加。
+
+pH和fixed acidity以及citric acid之间存在负相关，一个增加另外一个减少, 这个符合酸性的常识。
+
+total sulfur dioxide和free sulfur dioxide正相关，以为total sulfur dioxide包含了free sulfur dioxide，
+所以一个增加另外一个也增加。
+
+```{r}
+# Plot the scatterplot for chlorides and sulphates
+ggplot(data = wine, aes(x = chlorides, y = sulphates)) +
+  geom_jitter(alpha=1/3, color = 'blue') +
+  geom_smooth(method='lm', color='red')
+
+# Plot the scatterplot for chlorides and sulphates
+# which excludes the top 5% values
+ggplot(data = wine, aes(x = chlorides, y = sulphates)) +
+  geom_jitter(alpha=1/3, color = 'blue') +
+  xlim(0, quantile(wine$chlorides, 0.95)) +
+  ylim(0, quantile(wine$sulphates, 0.95)) +
+  geom_smooth(method='lm', color='red')
+
+# Find the correlation coefficient of chlorides/sulphates with top 5% removed
+with(subset(wine, chlorides < quantile(wine$chlorides, 0.95) & 
+              sulphates < quantile(wine$sulphates, 0.95)),
+     cor.test(chlorides, sulphates))
+```
+可以看出chlorides和sulphates不是真的相关。他们的相关系数是？？，但是删除5%的异常值后，相关系数变成了-0.05
 
 # Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+Quality和alcohol(0.48)，volatile acidity(-0.39)， sulphates (0.25)，citric acid (0.23)正相关
+
+高质量的红酒含有酒精值也更高
+
+高质量的红酒有更低的volatile acidity
+
+Quality和sulphates貌似有正相关，但是当Quality为5时出现了很多异常值
+
+低Quality（3，4）的红酒citric acid含量很低；中等Quality（5，6）的红酒大约0.25 g/dm^3的citric acid；高Quality（7，8）的红酒citric acid含量超过0.25 g/dm^3。
+
+高Quality的红酒含有的density和pH更低。
+
 
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+高fixed acidity的红酒citric acid也高，更高的citric acid相应的红酒质量更高。volatile acidity和fixed acidity负相关，高volatile acidity的红酒导致红酒的quality更低。
+
 
 ### What was the strongest relationship you found?
-
+红酒的quality和alcohol有着最强的相关性，从boxplot看出，alcohol越高，红酒的quality越高。
 
 
 
 # Multivariate Plots Section
 
-```{r echo=FALSE, Multivariate_Plots}
+```{r}
+# Plot the scatterplot of citric acid and volatile acidity, color by quality
+ggplot(data=wine,aes(x=citric.acid, y=volatile.acidity, color=quality)) +
+  geom_point(alpha=1, position='jitter') +
+  scale_color_brewer(type='div')
+
+# Plot the scatterplot of citric acid and volatile acidity, facet by quality
+# Also add the smoothed conditional mean to the plots
+ggplot(data=wine,aes(x=citric.acid, y=volatile.acidity, color=quality)) + 
+  geom_point(alpha=0.5, position='jitter') +
+  geom_smooth(method='lm') +
+  facet_wrap(~quality) + 
+  scale_color_brewer(type='div') +
+  scale_x_continuous(breaks=c(0,0.25,0.5,0.75)) +
+  theme(axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10))
+
+# Plot the scatterplot of citric acid and volatile acidity, facet by quality
+# Show the smoothed conditional means in the same plot
+ggplot(aes(x=citric.acid, y=volatile.acidity, color = quality), 
+       data = wine) + 
+  geom_point(alpha=0.2, position = 'jitter') +
+  geom_smooth(method='lm', se=FALSE, size=1)
+```
+上面的boxplot解释了citric acid和不同的quality之间的关系。每一类quality，citric acid和volatile acidity都是负相关。说明了下面两点
+1. 高quality的红酒有更低的volatile acidity
+2. 对于每一类的quality，citric acid和volatile acidity负相关
+
+```{r}
+# Plot the boxplots of citric.acid/fixed.acidity by quality
+qplot(x = quality, y = citric.acid/fixed.acidity, data = wine, 
+      geom = 'boxplot')
+
+# Plot the histogram of citric.acid/fixed.acidity, color by quality
+ggplot(data = wine, aes(x=citric.acid/fixed.acidity)) +
+  geom_bar(aes(fill=quality))
 
 ```
 
 # Multivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+在不同的quality分类下，citric acid和volatile acidity之间的关系进一步增强了。在每一类的quality下面，citric acid和volatile acidity都是负相关。使用citric acid和volatile acidity的线性模型用来预测quality。
 
 ### Were there any interesting or surprising interactions between features?
+citric acid和fixed acidity的比例，对于红酒的quality是一个很好的参考。高quality的红酒这个比例接近0.05。
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
 
@@ -337,20 +415,37 @@ ggplot(data = wine, aes(x = total.sulfur.dioxide, y = free.sulfur.dioxide)) +
 # Final Plots and Summary
 
 ### Plot One
-```{r echo=FALSE, Plot_One}
-
+```{r}
+# Plot the frequency polygon of citric acid
+qplot(citric.acid, data = wine, color=I(color_fill), binwidth=0.01, 
+      geom = 'freqpoly') +
+  ggtitle('Frequency Polygon of Citric Acid') +
+  xlab('Citric Acid (g / dm^3)') +
+  ylab('Number of Samples') +
+  theme(plot.title = element_text(size = 16))
 ```
 
 ### Description One
-
+citric acid出现多峰分布，有三个峰值出现在0, 0.25和0.5。样本含有大量的0值。
 
 ### Plot Two
-```{r echo=FALSE, Plot_Two}
-
+```{r}
+# Plot the scatterplot of citric acid and volatile acidity, facet by quality
+# Show the smoothed conditional means in the same plot
+ggplot(data = wine, aes(x=citric.acid, y=volatile.acidity, 
+                        color = quality)) + 
+  geom_point(alpha=0.7, position = 'jitter') +
+  geom_smooth(method='lm', se=FALSE, size=1) +
+  coord_cartesian(xlim = c(0, 0.8), ylim=c(0,1.25)) +
+  ggtitle('Citric Acid / Volatile Acidity by Quality') +
+  xlab('Citric Acid (g / dm^3)') +
+  ylab('Volatile Acidity (g / dm^3)') +
+  scale_color_discrete(name="Quality") +
+  theme(plot.title = element_text(size = 16))
 ```
 
 ### Description Two
-
+高quality的红酒有更高的citric acid和更低的volatile acidity，citric acid和volatile acidity呈负相关。
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
