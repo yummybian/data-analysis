@@ -32,8 +32,8 @@ color_fill <- '#099DD9'
 wine <- read.csv("wineQualityReds.csv")
 
 # 删除无用的X变量
-# wine <- within(wine, rm(X))
-wine$X <- NULL
+wine <- within(wine, rm(X))
+# wine$X <- NULL
 ```
 
 
@@ -446,10 +446,35 @@ ggplot(data = wine, aes(x=citric.acid, y=volatile.acidity,
 
 ### Description Two
 高quality的红酒有更高的citric acid和更低的volatile acidity，citric acid和volatile acidity呈负相关。
+可能的原因是citric acid和volatile acidity在某种条件下会互相转换。
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
+# Plot the histogram of citric.acid/fixed.acidity, color by quality
+ggplot(data = wine, aes(x=citric.acid/fixed.acidity)) +
+  geom_bar(color=I('black'),aes(fill=quality)) +
+  ggtitle('Citric Acid to Fixed Acidity ratio by Quality') +
+  xlab('Citric Acid / Fixed Acidity') +
+  ylab('Number of Samples') +
+  scale_fill_discrete(name="Quality") +
+  theme(plot.title = element_text(size = 16))
+```
 
+```{r echo=FALSE, Plot_Three}
+
+wine$rating <- ifelse(wine$quality < 5, 'bad', 
+                    ifelse(wine$quality < 7, 'average', 
+                           ifelse(wine$quality > 6, 'excellent', 'none')))
+
+wine$rating <- ordered(wine$rating, levels = c('bad', 'average', 'excellent'))
+
+# Create conditional density plot with two of the arguably most 
+# important variable in determining bad wine.
+
+cdplot(rating ~ volatile.acidity, data = wine,
+       xlab = 'Volatile Acidity (g / dm^3)', 
+       ylab = 'Quality', 
+       main='Volatile Acidity vs Quality')
 ```
 
 ### Description Three
