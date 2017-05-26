@@ -450,21 +450,8 @@ ggplot(data = wine, aes(x=citric.acid, y=volatile.acidity,
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
-# Plot the histogram of citric.acid/fixed.acidity, color by quality
-ggplot(data = wine, aes(x=citric.acid/fixed.acidity)) +
-  geom_bar(color=I('black'),aes(fill=quality)) +
-  ggtitle('Citric Acid to Fixed Acidity ratio by Quality') +
-  xlab('Citric Acid / Fixed Acidity') +
-  ylab('Number of Samples') +
-  scale_fill_discrete(name="Quality") +
-  theme(plot.title = element_text(size = 16))
-```
-
-```{r echo=FALSE, Plot_Three}
-
 wine$rating <- ifelse(wine$quality < 5, 'bad', 
-                    ifelse(wine$quality < 7, 'average', 
-                           ifelse(wine$quality > 6, 'excellent', 'none')))
+                    ifelse(wine$quality < 7, 'average', 'excellent'))
 
 wine$rating <- ordered(wine$rating, levels = c('bad', 'average', 'excellent'))
 
@@ -474,10 +461,14 @@ wine$rating <- ordered(wine$rating, levels = c('bad', 'average', 'excellent'))
 cdplot(rating ~ volatile.acidity, data = wine,
        xlab = 'Volatile Acidity (g / dm^3)', 
        ylab = 'Quality', 
-       main='Volatile Acidity vs Quality')
+       main = 'Volatile Acidity vs Quality')
 ```
 
+
 ### Description Three
+从图上可以看出，当volatile acidity大于1时，红酒的品质就不可能为excellent。当volatile acidity为0或者0.3时，红酒的品质有40%的可能性为excellent。但是当volatile acidity在1和1.2之间时，红酒的品质有80%的可能性为bad。然而当volatile acidity大于1.4时，红酒的品质100%是bad。因此volatile acidity是好的特征来检验红酒的品质是否为bad。
+
+
 
 ------
 
