@@ -27,8 +27,8 @@ suppressMessages(library(corrplot))
 color_fill <- '#099DD9'
 ```
 
-```{r echo=FALSE, Load_the_Data}
-# load csv
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# 加载csv文件
 wine <- read.csv("wineQualityReds.csv")
 
 # 删除无用的X变量
@@ -38,7 +38,7 @@ wine <- within(wine, rm(X))
 
 
 # Univariate Plots Section
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # 查看变量
 names(wine)
 str(wine)
@@ -51,8 +51,9 @@ wine$quality <- factor(wine$quality, ordered = T)
 ```
 可以看到有1599条样本，每条样本有13个变量
 
+
 绘制所有变量的直方图
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 get_histogram <- function(var, xlabel) {
   return (qplot(x = var, data = wine, xlab = xlabel, fill = I(color_fill)))
 }
@@ -73,7 +74,7 @@ ncol = 3)
 ```
 
 绘制quality的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(quality, data = wine, fill=I(color_fill))
 table(wine$quality)
 ```
@@ -81,7 +82,7 @@ table(wine$quality)
 
 
 绘制fixed.acidity的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(fixed.acidity, data = wine, fill=I(color_fill))
 sort(table(wine$fixed.acidity), decreasing = T)
 ```
@@ -89,14 +90,14 @@ sort(table(wine$fixed.acidity), decreasing = T)
 
 
 绘制volatile.acidity的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(volatile.acidity, data = wine, fill=I(color_fill))
 sort(table(wine$volatile.acidity), decreasing = T)
 ```
 volatile.acidity的峰值出现在0.6， 在1.6左右出现了异常值
 
 移除1%的异常值，再次绘制直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(volatile.acidity, data = wine, fill=I(color_fill), binwidth=0.02) +
   coord_cartesian(xlim = c(0, quantile(wine$volatile.acidity, .99)))
 ```
@@ -104,62 +105,62 @@ qplot(volatile.acidity, data = wine, fill=I(color_fill), binwidth=0.02) +
 出现了近似对称的双峰直方图
 
 绘制citric.acid的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(citric.acid, data = wine, fill=I(color_fill))
 table(wine$citric.acid)
 ```
 发现132个0值，和一个为1的异常值，这是一个多峰分布
 
 绘制residual.sugar的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(residual.sugar, data = wine, fill=I(color_fill))
 sort(table(wine$residual.sugar), decreasing = T)
 ```
 峰值出现在2，有很长的长尾
 
 对residual.sugar做对数变换，然后再次绘制直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(residual.sugar, data = wine, fill=I(color_fill)) +
   scale_x_log10()
 ```
 
 
 绘制chlorides的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(chlorides, data = wine, fill=I(color_fill))
 sort(table(wine$chlorides), decreasing = T)
 ```
 峰值处在在0.08，有很长的长尾
 
 对chlorides做对数变换，然后再次绘制直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(chlorides, data = wine, fill=I(color_fill)) +
   scale_x_log10()
 ```
 
 绘制free.sulfur.dioxide的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(free.sulfur.dioxide, data = wine, fill=I(color_fill))
 head(sort(table(wine$free.sulfur.dioxide), decreasing = T))
 ```
 free.sulfur.dioxide峰值出现在6，有长尾并出现了一些异常值
 
 绘制total.sulfur.dioxide的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(total.sulfur.dioxide, data = wine, fill=I(color_fill))
 head(sort(table(wine$total.sulfur.dioxide), decreasing = T))
 ```
 free.sulfur.dioxide峰值出现在28，有长尾并出现了一些异常值。他和free.sulfur.dioxide分布类似，我觉得这两个变量具有相关性。
 
 绘制density的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(density, data = wine, fill=I(color_fill))
 summary(wine$density)
 ```
 正态分布，中位数0.9968，均值0.9967
 
 绘制pH的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(pH, data = wine, fill=I(color_fill))
 summary(wine$pH)
 ```
@@ -167,7 +168,7 @@ summary(wine$pH)
 
 
 绘制sulphates的直方图
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(sulphates, data = wine, fill=I(color_fill))
 
 qplot(sulphates, data = wine, fill=I(color_fill)) +
@@ -177,7 +178,7 @@ qplot(sulphates, data = wine, fill=I(color_fill)) +
 
 
 绘制alcohol的长尾
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(alcohol, data = wine, fill=I(color_fill))
 head(sort(table(wine$alcohol), decreasing = T))
 ```
@@ -196,6 +197,7 @@ head(sort(table(wine$alcohol), decreasing = T))
 主要关心quality变量，想知道有哪些因素影响这个变量
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+我对volatile acid和citric acid感兴趣。我了解到少量的citric acid能够增强红酒的口感，而高的volatile acid会降低红酒的口感。我还猜测residual sugar，free/total sulfur dioxide和alcohol也会影响红酒的quality。这些猜测在下面的分析中将被证实。
 
 ### Did you create any new variables from existing variables in the dataset?
 
