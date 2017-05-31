@@ -27,6 +27,7 @@ suppressMessages(library(corrplot))
 color_fill <- '#099DD9'
 ```
 
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # 加载csv文件
 wine <- read.csv("wineQualityReds.csv")
@@ -47,7 +48,7 @@ str(wine)
 summary(wine)
 
 # 转换quality为factor
-wine$quality <- factor(wine$quality, ordered = T)
+wine$quality_factor <- factor(wine$quality, ordered = T)
 ```
 可以看到有1599条样本，每条样本有13个变量
 
@@ -200,84 +201,84 @@ head(sort(table(wine$alcohol), decreasing = T))
 我对volatile acid和citric acid感兴趣。我了解到少量的citric acid能够增强红酒的口感，而高的volatile acid会降低红酒的口感。我还猜测residual sugar，free/total sulfur dioxide和alcohol也会影响红酒的quality。这些猜测在下面的分析中将被证实。
 
 ### Did you create any new variables from existing variables in the dataset?
+我为quality创建了factor变量。用它来做红酒quality的分类。
 
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
-
+residual sugar, chlorides和sulphates变量表现出右偏并且带有长尾，我用log算法对他们进行了转换。
+log算法会让异常值更接近median。转换后这些变量看起来更像正态分布。
 
 
 # Bivariate Plots Section
-```{r echo=FALSE, Bivariate_Plots}
-# 把quality因子转换为数字类型
-wine$numquality <- as.numeric(wine$quality)
-# 相关性矩阵保存为一个data frame
-m = cor(wine[c(1:11, 13)])
-# 显示相关性矩阵
-corrplot(m, order = "hclust", insig = "pch", addrect = 3)
-pairs.panels(m, pch=".")
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# 打印协方差矩阵
+cor(wine[,c(1:12)])
+# 排除quality_factor变量
+pairs.panels(wine[,1:12], pch=".")
 ```
-可以看出quality和alcohol，volatile acidity，sulphates和citric acid相关性比较大
+可以看出quality和alcohol(0.48)，volatile acidity(-0.39)，sulphates(0.25)和citric acid(0.23)相关性比较大
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # quality/alcohol boxplot
-qplot(x = quality, y = alcohol, data = wine, geom = 'boxplot')
+qplot(x = quality_factor, y = alcohol, data = wine, geom = 'boxplot')
 # 根据quality显示alcohol的summary
 by(wine$alcohol, wine$quality, summary)
 ```
 可以看出高quality的红酒相应的alcohol也高。除了quality为5的红酒，其他红酒的alcohol的中位数呈现升高的趋势，而且quality为5的红酒的异常值有很多。我觉得可能是样本的错误。
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # quality/volatile.acidity boxplot
-qplot(x = quality, y = volatile.acidity, data = wine, geom = 'boxplot')
+qplot(x = quality_factor, y = volatile.acidity, data = wine, geom = 'boxplot')
 # 根据quality显示volatile.acidity的summary
 by(wine$volatile.acidity, wine$quality, summary)
 ```
 可以看出，volatile.acidity和quality呈现负相关。随着quality的提高，volatile.acidity的中位数相应的降低，但quality为7，8的变化不明显。总的来说，好的红酒volatile.acidity比较低。
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # quality/sulphates boxplot
-qplot(x = quality, y = sulphates, data = wine, geom = 'boxplot')
+qplot(x = quality_factor, y = sulphates, data = wine, geom = 'boxplot')
 # 根据quality显示sulphates的summary
 by(wine$sulphates, wine$quality, summary)
 ```
 可以看出随着quality的提高，sulphates也相应提高。但quality为5，6的样本中出现很多的异常值，也许是由于样本的错误，所以我们不能说sulphates和quality有相关性，只能说sulphates可能对红酒口味有影响。
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # quality/citric.acid boxplot
-qplot(x = quality, y = citric.acid, data = wine, geom = 'boxplot')
+qplot(x = quality_factor, y = citric.acid, data = wine, geom = 'boxplot')
 # 根据quality显示citric.acid的summary
 by(wine$citric.acid, wine$quality, summary)
 ```
 可以看出随着红酒quality的提高，citric.acid也相应提高，他们是正相关的。一个有趣的现象，quality为3，4的，quality为5，6，quality为7，8的中位数很接近。
 
-```{r}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # boxplot for the others
-qplot(x = quality, y = fixed.acidity, data = wine, geom = 'boxplot') +
+qplot(x = quality_factor, y = fixed.acidity, data = wine, geom = 'boxplot') +
   ylim(quantile(wine$fixed.acidity, 0.05), quantile(wine$fixed.acidity, 0.95))
-qplot(x = quality, y = residual.sugar, data = wine, geom = 'boxplot') +
+qplot(x = quality_factor, y = residual.sugar, data = wine, geom = 'boxplot') +
   ylim(0, quantile(wine$residual.sugar, 0.95))
-qplot(x = quality, y = chlorides, data = wine, geom = 'boxplot') +
+qplot(x = quality_factor, y = chlorides, data = wine, geom = 'boxplot') +
   ylim(quantile(wine$chlorides, 0.05), quantile(wine$chlorides, 0.95))
-qplot(x = quality, y = free.sulfur.dioxide, data = wine, geom = 'boxplot') +
+qplot(x = quality_factor, y = free.sulfur.dioxide, data = wine, geom = 'boxplot') +
   ylim(0, quantile(wine$free.sulfur.dioxide, 0.95))
-qplot(x = quality, y = total.sulfur.dioxide, data = wine, geom = 'boxplot') +
+qplot(x = quality_factor, y = total.sulfur.dioxide, data = wine, geom = 'boxplot') +
   ylim(0, quantile(wine$total.sulfur.dioxide, 0.95))
-qplot(x = quality, y = density, data = wine, geom = 'boxplot')
+qplot(x = quality_factor, y = density, data = wine, geom = 'boxplot')
   ylim(quantile(wine$density, 0.05), quantile(wine$density, 0.95))
-qplot(x = quality, y = pH, data = wine, geom = 'boxplot')
+qplot(x = quality_factor, y = pH, data = wine, geom = 'boxplot')
   ylim(quantile(wine$pH, 0.05), quantile(wine$pH, 0.95))
 ```
-可以看到，density，pH，fixed.acidity和quality直接也有相关性，quality高的红酒相应的fixed.acidity也高，quality高的红酒相应的density和pH低
+可以看到，density，pH，fixed.acidity和quality之间也有相关性，quality高的红酒相应的fixed.acidity也高，quality高的红酒相应的density和pH低
 
 从相关性矩阵，可以看出其他非quality变量直接也有相关性
 1. Fixed acidity vs citric acid (0.67)
 2. Volatile acidity vs citric acid (-0.55)
 3. Fixed acidity vs density (0.67)
 4. Fixed acidity vs pH (-0.68)
-5. Citric acid vs pH (0.67)
+5. Citric acid vs pH (-0.54)
 6. Free sulfur dioxide vs total sulfur dioxide (0.67)
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # scatterplot for citric acid and fixed acidity
 ggplot(data = wine, aes(x = citric.acid, y = fixed.acidity)) +
   geom_jitter(alpha=1/3, color = 'blue') +
@@ -315,11 +316,13 @@ pH和fixed acidity以及citric acid之间存在负相关，一个增加另外一
 total sulfur dioxide和free sulfur dioxide正相关，以为total sulfur dioxide包含了free sulfur dioxide，
 所以一个增加另外一个也增加。
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Plot the scatterplot for chlorides and sulphates
 ggplot(data = wine, aes(x = chlorides, y = sulphates)) +
   geom_jitter(alpha=1/3, color = 'blue') +
   geom_smooth(method='lm', color='red')
+
+cor.test(wine$chlorides, wine$sulphates)
 
 # Plot the scatterplot for chlorides and sulphates
 # which excludes the top 5% values
@@ -334,12 +337,13 @@ with(subset(wine, chlorides < quantile(wine$chlorides, 0.95) &
               sulphates < quantile(wine$sulphates, 0.95)),
      cor.test(chlorides, sulphates))
 ```
-可以看出chlorides和sulphates不是真的相关。他们的相关系数是？？，但是删除5%的异常值后，相关系数变成了-0.05
+可以看出chlorides和sulphates不是真的相关。他们的相关系数是0.37，但是删除5%的异常值后，相关系数变成了-0.05
 
 # Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
-Quality和alcohol(0.48)，volatile acidity(-0.39)， sulphates (0.25)，citric acid (0.23)正相关
+
+Quality和其他变量的相关系数分别为alcohol(0.48)，volatile acidity(-0.39)， sulphates (0.25)，citric acid (0.23)
 
 高质量的红酒含有酒精值也更高
 
@@ -363,15 +367,16 @@ Quality和sulphates貌似有正相关，但是当Quality为5时出现了很多�
 
 # Multivariate Plots Section
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Plot the scatterplot of citric acid and volatile acidity, color by quality
-ggplot(data=wine,aes(x=citric.acid, y=volatile.acidity, color=quality)) +
+ggplot(data=wine,aes(x=citric.acid, y=volatile.acidity, color=quality_factor)) +
   geom_point(alpha=1, position='jitter') +
   scale_color_brewer(type='div')
 
+
 # Plot the scatterplot of citric acid and volatile acidity, facet by quality
 # Also add the smoothed conditional mean to the plots
-ggplot(data=wine,aes(x=citric.acid, y=volatile.acidity, color=quality)) + 
+ggplot(data=wine,aes(x=citric.acid, y=volatile.acidity, color=quality_factor)) + 
   geom_point(alpha=0.5, position='jitter') +
   geom_smooth(method='lm') +
   facet_wrap(~quality) + 
@@ -382,25 +387,22 @@ ggplot(data=wine,aes(x=citric.acid, y=volatile.acidity, color=quality)) +
 
 # Plot the scatterplot of citric acid and volatile acidity, facet by quality
 # Show the smoothed conditional means in the same plot
-ggplot(aes(x=citric.acid, y=volatile.acidity, color = quality), 
+ggplot(aes(x=citric.acid, y=volatile.acidity, color = quality_factor), 
        data = wine) + 
   geom_point(alpha=0.2, position = 'jitter') +
   geom_smooth(method='lm', se=FALSE, size=1)
 ```
-上面的boxplot解释了citric acid和不同的quality之间的关系。每一类quality，citric acid和volatile acidity都是负相关。说明了下面两点
+上面的boxplot解释了citric acid和volatile acidity在不同的quality下之间的关系。每一类quality，citric acid和volatile acidity都是负相关。说明了下面两点
 1. 高quality的红酒有更低的volatile acidity
 2. 对于每一类的quality，citric acid和volatile acidity负相关
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Plot the boxplots of citric.acid/fixed.acidity by quality
-qplot(x = quality, y = citric.acid/fixed.acidity, data = wine, 
+qplot(x = quality_factor, y = citric.acid/fixed.acidity, data = wine, 
       geom = 'boxplot')
-
-# Plot the histogram of citric.acid/fixed.acidity, color by quality
-ggplot(data = wine, aes(x=citric.acid/fixed.acidity)) +
-  geom_bar(aes(fill=quality))
-
 ```
+可以看出高质量的红酒citric.acid和fixed.acidity之间的比例接近0.05
+
 
 # Multivariate Analysis
 
@@ -417,7 +419,7 @@ citric acid和fixed acidity的比例，对于红酒的quality是一个很好的�
 # Final Plots and Summary
 
 ### Plot One
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Plot the frequency polygon of citric acid
 qplot(citric.acid, data = wine, color=I(color_fill), binwidth=0.01, 
       geom = 'freqpoly') +
@@ -431,11 +433,11 @@ qplot(citric.acid, data = wine, color=I(color_fill), binwidth=0.01,
 citric acid出现多峰分布，有三个峰值出现在0, 0.25和0.5。样本含有大量的0值。
 
 ### Plot Two
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Plot the scatterplot of citric acid and volatile acidity, facet by quality
 # Show the smoothed conditional means in the same plot
 ggplot(data = wine, aes(x=citric.acid, y=volatile.acidity, 
-                        color = quality)) + 
+                        color = quality_factor)) + 
   geom_point(alpha=0.7, position = 'jitter') +
   geom_smooth(method='lm', se=FALSE, size=1) +
   coord_cartesian(xlim = c(0, 0.8), ylim=c(0,1.25)) +
@@ -451,7 +453,7 @@ ggplot(data = wine, aes(x=citric.acid, y=volatile.acidity,
 可能的原因是citric acid和volatile acidity在某种条件下会互相转换。
 
 ### Plot Three
-```{r echo=FALSE, Plot_Three}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 wine$rating <- ifelse(wine$quality < 5, 'bad', 
                     ifelse(wine$quality < 7, 'average', 'excellent'))
 
@@ -459,13 +461,11 @@ wine$rating <- ordered(wine$rating, levels = c('bad', 'average', 'excellent'))
 
 # Create conditional density plot with two of the arguably most 
 # important variable in determining bad wine.
-
 cdplot(rating ~ volatile.acidity, data = wine,
        xlab = 'Volatile Acidity (g / dm^3)', 
        ylab = 'Quality', 
        main = 'Volatile Acidity vs Quality')
 ```
-
 
 ### Description Three
 从图上可以看出，当volatile acidity大于1时，红酒的品质就不可能为excellent。当volatile acidity为0或者0.3时，红酒的品质有40%的可能性为excellent。但是当volatile acidity在1和1.2之间时，红酒的品质有80%的可能性为bad。然而当volatile acidity大于1.4时，红酒的品质100%是bad。因此volatile acidity是好的特征来检验红酒的品质是否为bad。
@@ -475,5 +475,8 @@ cdplot(rating ~ volatile.acidity, data = wine,
 ------
 
 # Reflection
+这数据集包含了1599个样本，每个样本12个变量。首先为了找出变量的分布，我检查了每个变量的直方图。对于一些变量，我发现了一些有趣的分布，例如citric acid的多峰分布。接下来通过协方差矩阵，我探索了所以变量和quality之间的关系。一些变量和quality之间存在着较强的相关性，例如Alcohol, Volatile Acidity, Sulphates和Citric Acid。绘制了这些变量和quality的box plot。我认为citric acid表现出多峰分布，所以我对它产生了兴趣。下面聚焦在citric acid, fixed acidity和volatile acidity之间的关系。最后得出关于citric acid和fixed acidity之间比例，citric acid和volatile acidity负相关，Volatile acidity可以决定坏的quality的结论。
 
+
+在这个数据集中一个明显的缺陷就是依赖于品尝者的主观偏好。例如，一些专家倾向于某种方法来判断红酒的quality（干/甜度）。普通人一般不知道这些方法，我想知道普通人如果用这些方法来判断红酒会和专家产生多大的区别。我建议选择不同品尝者的人群会让数据更有说服力。
 
